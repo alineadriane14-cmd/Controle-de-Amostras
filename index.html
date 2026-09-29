@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Amostras Grátis · Farmácia UBS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topo">
+  <div class="topo-conteudo">
+    <div class="logo">
+      <svg viewBox="0 0 48 48" aria-hidden="true"><rect x="4" y="4" width="40" height="40" rx="12" fill="#fff"/><path d="M20 12h8v8h8v8h-8v8h-8v-8h-8v-8h8z" fill="#10b981"/></svg>
+      <div>
+        <h1>Amostras Grátis</h1>
+        <p>Controle de estoque · Farmácia da UBS</p>
+      </div>
+    </div>
+    <span id="modo" class="modo">conectando…</span>
+  </div>
+  <nav class="abas" role="tablist">
+    <button class="aba ativa" data-aba="estoque"   style="--c:#3b82f6">Estoque</button>
+    <button class="aba"       data-aba="adicionar" style="--c:#10b981">Adicionar</button>
+    <button class="aba"       data-aba="retirar"   style="--c:#f97316">Retirar</button>
+    <button class="aba"       data-aba="historico" style="--c:#8b5cf6">Histórico</button>
+    <button class="aba"       data-aba="config"    style="--c:#64748b">Ajustes</button>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ================= ESTOQUE ================= -->
+  <section id="estoque" class="painel ativo">
+    <div class="resumo" id="resumo"></div>
+
+    <div class="cartao alerta-cartao">
+      <div class="cartao-titulo">
+        <h2>Próximos de vencer</h2>
+        <span class="dica" id="dica-limite"></span>
+      </div>
+      <div id="alertas" class="alertas"></div>
+    </div>
+
+    <div class="cartao">
+      <div class="cartao-titulo">
+        <h2>Estoque geral</h2>
+        <button class="btn btn-leve" id="exportar-estoque">Baixar planilha</button>
+      </div>
+      <div class="filtros">
+        <input type="search" id="busca" placeholder="Buscar medicamento…">
+        <select id="filtro-sala">
+          <option value="">Todas as salas</option>
+          <option>Sala 1</option><option>Sala 2</option>
+        </select>
+        <select id="filtro-classe"><option value="">Todas as classes</option></select>
+        <select id="filtro-status">
+          <option value="">Todos os status</option>
+          <option value="vencido">Vencidos</option>
+          <option value="critico">Vence em até 30 dias</option>
+          <option value="atencao">Vence em breve</option>
+          <option value="ok">Validade ok</option>
+        </select>
+        <label class="check"><input type="checkbox" id="ocultar-zerados" checked> Ocultar esgotados</label>
+      </div>
+      <div id="lista-estoque" class="lista"></div>
+    </div>
+  </section>
+
+  <!-- ================= ADICIONAR ================= -->
+  <section id="adicionar" class="painel">
+    <div class="cartao foto-cartao">
+      <h2>Adicionar por foto</h2>
+      <p class="sub">Tire uma foto da caixa do medicamento. O site lê o nome, a dosagem, a quantidade e a validade e preenche o formulário abaixo para você conferir.</p>
+      <div class="foto-area">
+        <label class="btn btn-foto">
+          <input type="file" id="foto" accept="image/*" capture="environment" hidden>
+          Tirar ou escolher foto
+        </label>
+        <img id="foto-previa" alt="" hidden>
+      </div>
+      <div id="foto-status" class="foto-status" hidden></div>
+    </div>
+
+    <form id="form-add" class="cartao" autocomplete="off">
+      <h2>Dados do medicamento</h2>
+      <div class="grade">
+        <label class="campo largo">Nome do medicamento *
+          <input id="add-nome" required placeholder="Ex.: Losartana potássica">
+        </label>
+        <label class="campo">Dosagem / apresentação
+          <input id="add-dose" placeholder="Ex.: 50 mg">
+        </label>
+        <label class="campo">Classe
+          <select id="add-classe"></select>
+          <span id="add-classe-info" class="info-classe"></span>
+        </label>
+        <label class="campo">Quantidade *
+          <input id="add-qtd" type="number" min="1" required placeholder="0">
+        </label>
+        <label class="campo">Unidade
+          <select id="add-unidade">
+            <option>caixas</option><option>comprimidos</option><option>cápsulas</option>
+            <option>frascos</option><option>blisters</option><option>ampolas</option>
+            <option>bisnagas</option><option>unidades</option>
+          </select>
+        </label>
+        <label class="campo">Validade *
+          <input id="add-validade" type="date" required>
+        </label>
+        <label class="campo">Lote
+          <input id="add-lote" placeholder="Opcional">
+        </label>
+      </div>
+      <fieldset class="salas">
+        <legend>Onde vai ficar guardado? *</legend>
+        <label class="sala sala1"><input type="radio" name="add-local" value="Sala 1" required><span>Sala 1</span></label>
+        <label class="sala sala2"><input type="radio" name="add-local" value="Sala 2"><span>Sala 2</span></label>
+      </fieldset>
+      <button class="btn btn-verde grande" type="submit">Adicionar ao estoque</button>
+    </form>
+  </section>
+
+  <!-- ================= RETIRAR ================= -->
+  <section id="retirar" class="painel">
+    <form id="form-ret" class="cartao" autocomplete="off">
+      <h2>Registrar retirada</h2>
+      <p class="sub">Quem pegou um medicamento registra aqui. A quantidade sai do estoque automaticamente.</p>
+      <label class="campo">Buscar medicamento
+        <input type="search" id="ret-busca" placeholder="Digite parte do nome…">
+      </label>
+      <label class="campo">Medicamento *
+        <select id="ret-med" required></select>
+      </label>
+      <div id="ret-info" class="ret-info"></div>
+      <div class="grade">
+        <label class="campo">Quantidade retirada *
+          <input id="ret-qtd" type="number" min="1" required placeholder="0">
+        </label>
+        <label class="campo">Quem retirou *
+          <input id="ret-resp" required placeholder="Seu nome">
+        </label>
+        <label class="campo">Paciente / destino
+          <input id="ret-destino" placeholder="Opcional">
+        </label>
+        <label class="campo">Observação
+          <input id="ret-obs" placeholder="Opcional">
+        </label>
+      </div>
+      <button class="btn btn-laranja grande" type="submit">Confirmar retirada</button>
+    </form>
+  </section>
+
+  <!-- ================= HISTÓRICO ================= -->
+  <section id="historico" class="painel">
+    <div class="cartao">
+      <div class="cartao-titulo">
+        <h2>Histórico de retiradas</h2>
+        <button class="btn btn-leve" id="exportar-hist">Baixar planilha</button>
+      </div>
+      <div class="filtros">
+        <input type="search" id="hist-busca" placeholder="Buscar por remédio, pessoa ou paciente…">
+        <input type="date" id="hist-de" title="De">
+        <input type="date" id="hist-ate" title="Até">
+      </div>
+      <div id="lista-hist" class="lista"></div>
+    </div>
+  </section>
+
+  <!-- ================= AJUSTES ================= -->
+  <section id="config" class="painel">
+    <div class="cartao">
+      <h2>Ajustes</h2>
+      <label class="campo">Avisar quando faltar quantos dias para vencer?
+        <select id="cfg-limite">
+          <option value="30">30 dias</option><option value="60">60 dias</option>
+          <option value="90">90 dias</option><option value="120">120 dias</option>
+        </select>
+      </label>
+      <h3>Leitura de foto com inteligência artificial (opcional)</h3>
+      <p class="sub">Sem chave, a foto é lida por reconhecimento de texto (gratuito, funciona na maioria das caixas). Com uma chave gratuita do Google Gemini a leitura fica bem mais precisa e consegue até contar as caixas da foto. A chave fica salva só neste navegador, nunca no GitHub.</p>
+      <label class="campo">Chave da API Gemini
+        <input id="cfg-gemini" type="password" placeholder="Cole aqui (opcional)">
+      </label>
+      <label class="campo">Modelo
+        <input id="cfg-modelo" placeholder="gemini-2.5-flash">
+      </label>
+      <button class="btn btn-verde" id="cfg-salvar" type="button">Salvar ajustes</button>
+    </div>
+  </section>
+</main>
+
+<!-- Modal de edição -->
+<dialog id="modal">
+  <form id="form-edit" method="dialog" class="modal-corpo">
+    <h2>Editar medicamento</h2>
+    <div class="grade">
+      <label class="campo largo">Nome<input id="ed-nome" required></label>
+      <label class="campo">Dosagem<input id="ed-dose"></label>
+      <label class="campo">Classe<select id="ed-classe"></select></label>
+      <label class="campo">Quantidade<input id="ed-qtd" type="number" min="0" required></label>
+      <label class="campo">Unidade<input id="ed-unidade"></label>
+      <label class="campo">Validade<input id="ed-validade" type="date" required></label>
+      <label class="campo">Lote<input id="ed-lote"></label>
+      <label class="campo">Local
+        <select id="ed-local"><option>Sala 1</option><option>Sala 2</option></select>
+      </label>
+    </div>
+    <div class="modal-botoes">
+      <button type="button" class="btn btn-perigo" id="ed-excluir">Excluir</button>
+      <span></span>
+      <button type="button" class="btn btn-leve" id="ed-cancelar">Cancelar</button>
+      <button type="submit" class="btn btn-verde" value="salvar">Salvar</button>
+    </div>
+  </form>
+</dialog>
+
+<div id="toasts" class="toasts"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js" defer></script>
+<script type="module" src="app.js"></script>
+</body>
+</html>
